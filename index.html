@@ -1,0 +1,1920 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1440, initial-scale=1">
+  <title>干翻传统公式编辑，全给我用LaTex</title>
+  <link rel="icon" href="assets/esdkaiyuan.png">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        processEscapes: true
+      },
+      svg: {
+        fontCache: 'none'
+      },
+      startup: {
+        typeset: false
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <style>
+    :root {
+      --bg-a: #e9eff6;
+      --bg-b: #f8fafc;
+      --ink: #172033;
+      --muted: #64748b;
+      --line: rgba(116, 139, 161, 0.28);
+      --panel: rgba(255, 255, 255, 0.68);
+      --panel-strong: rgba(255, 255, 255, 0.84);
+      --blue: #2f6fed;
+      --blue-dark: #1f56c2;
+      --cyan: #0f9eb5;
+      --green: #18875f;
+      --danger: #c2413b;
+      --shadow: 0 20px 54px rgba(31, 46, 72, 0.15);
+      --soft-shadow: 0 10px 28px rgba(31, 46, 72, 0.10);
+      --radius: 8px;
+      --mono: "Cascadia Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      --sans: Inter, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      --formula-font: "Cambria Math";
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-width: 1440px;
+      min-height: 100%;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        linear-gradient(135deg, rgba(47, 111, 237, 0.08), transparent 32%),
+        linear-gradient(160deg, var(--bg-a) 0%, var(--bg-b) 48%, #dfe8f1 100%);
+    }
+
+    body::before {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      content: "";
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.46) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.34) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.72), transparent 86%);
+    }
+
+    button,
+    textarea,
+    select,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+    }
+
+    .app-shell {
+      width: 1440px;
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 22px 24px 52px;
+    }
+
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 74px;
+      margin-bottom: 18px;
+      padding: 0 4px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 48px;
+      height: 48px;
+      place-items: center;
+      border: 1px solid rgba(47, 111, 237, 0.22);
+      border-radius: var(--radius);
+      color: var(--blue);
+      background: rgba(255, 255, 255, 0.68);
+      box-shadow: var(--soft-shadow);
+      backdrop-filter: blur(16px);
+      overflow: hidden;
+    }
+
+    .brand-mark img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: inherit;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 750;
+      letter-spacing: 0;
+    }
+
+    .brand p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 520px 1fr;
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .panel {
+      min-height: 770px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(22px) saturate(140%);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 64px;
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid rgba(116, 139, 161, 0.18);
+      background: rgba(255, 255, 255, 0.42);
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .panel-title i {
+      color: var(--blue);
+    }
+
+    .panel-note {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .panel-body {
+      padding: 16px 18px 18px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding-right: 8px;
+      margin-right: 2px;
+      border-right: 1px solid rgba(116, 139, 161, 0.22);
+    }
+
+    .toolbar-group:last-child {
+      padding-right: 0;
+      border-right: 0;
+    }
+
+    .tool-button,
+    .select-shell select {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 40px;
+      height: 40px;
+      gap: 8px;
+      padding: 0 12px;
+      border: 1px solid rgba(116, 139, 161, 0.26);
+      border-radius: var(--radius);
+      color: #1f2a44;
+      background: rgba(255, 255, 255, 0.66);
+      box-shadow: 0 3px 10px rgba(31, 46, 72, 0.06);
+      cursor: pointer;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease, color 160ms ease;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .tool-button:hover,
+    .select-shell select:hover {
+      transform: translateY(-1px);
+      border-color: rgba(47, 111, 237, 0.42);
+      color: var(--blue-dark);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 8px 18px rgba(31, 46, 72, 0.12);
+    }
+
+    .tool-button:active {
+      transform: translateY(0);
+      box-shadow: 0 3px 10px rgba(31, 46, 72, 0.08);
+    }
+
+    .tool-button.primary {
+      border-color: rgba(47, 111, 237, 0.34);
+      color: #fff;
+      background: linear-gradient(180deg, #3b7bf1, #2765d7);
+      box-shadow: 0 10px 20px rgba(47, 111, 237, 0.22);
+    }
+
+    .tool-button.primary:hover {
+      color: #fff;
+      background: linear-gradient(180deg, #4c89f4, #245fcf);
+    }
+
+    .tool-button.success {
+      color: #fff;
+      border-color: rgba(24, 135, 95, 0.28);
+      background: linear-gradient(180deg, #20a273, #16825d);
+      box-shadow: 0 10px 20px rgba(24, 135, 95, 0.18);
+    }
+
+    .tool-button.ghost-danger:hover {
+      color: var(--danger);
+      border-color: rgba(194, 65, 59, 0.32);
+    }
+
+    .tool-button.icon-only {
+      width: 40px;
+      padding: 0;
+    }
+
+    .tool-button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .select-shell {
+      position: relative;
+      display: inline-flex;
+    }
+
+    .select-shell select {
+      width: 168px;
+      padding: 0 34px 0 12px;
+      appearance: none;
+      color: #24314d;
+    }
+
+    .select-shell.wide select {
+      width: 210px;
+    }
+
+    .docx-options {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .docx-options input {
+      width: 100%;
+      height: 38px;
+      padding: 0 12px;
+      border: 1px solid rgba(116, 139, 161, 0.24);
+      border-radius: var(--radius);
+      outline: none;
+      color: #172033;
+      background: rgba(255, 255, 255, 0.42);
+      transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .docx-options input:focus {
+      border-color: rgba(47, 111, 237, 0.50);
+      background: rgba(255, 255, 255, 0.64);
+      box-shadow: 0 0 0 4px rgba(47, 111, 237, 0.10);
+    }
+
+    .select-shell::after {
+      position: absolute;
+      top: 50%;
+      right: 12px;
+      color: var(--muted);
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      pointer-events: none;
+      content: "\f078";
+      transform: translateY(-50%);
+      font-size: 11px;
+    }
+
+    .latex-input {
+      width: 100%;
+      min-height: 206px;
+      max-height: 206px;
+      padding: 16px;
+      border: 1px solid rgba(116, 139, 161, 0.28);
+      border-radius: var(--radius);
+      outline: none;
+      color: #12203a;
+      background: rgba(255, 255, 255, 0.24);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68);
+      font-family: var(--mono);
+      font-size: 14px;
+      line-height: 1.62;
+      resize: none;
+      overflow: auto;
+      transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .latex-input:focus {
+      border-color: rgba(47, 111, 237, 0.54);
+      background: rgba(255, 255, 255, 0.42);
+      box-shadow: 0 0 0 4px rgba(47, 111, 237, 0.10);
+    }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 16px 0 9px;
+      color: #334155;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .math-preview {
+      min-height: 208px;
+      max-height: 208px;
+      padding: 18px;
+      border: 1px solid rgba(116, 139, 161, 0.24);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.24);
+      overflow: auto;
+      font-size: 18px;
+      font-family: var(--formula-font), var(--sans);
+    }
+
+    .symbol-panel {
+      margin-top: 16px;
+    }
+
+    .symbol-tabs {
+      display: flex;
+      gap: 6px;
+      padding-bottom: 8px;
+      overflow-x: auto;
+    }
+
+    .symbol-tab {
+      height: 32px;
+      min-width: 54px;
+      padding: 0 10px;
+      border: 1px solid rgba(116, 139, 161, 0.24);
+      border-radius: var(--radius);
+      color: #475569;
+      background: rgba(255, 255, 255, 0.38);
+      cursor: pointer;
+      transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+    }
+
+    .symbol-tab:hover,
+    .symbol-tab.active {
+      color: var(--blue-dark);
+      border-color: rgba(47, 111, 237, 0.38);
+      background: rgba(255, 255, 255, 0.78);
+    }
+
+    .symbol-grid {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 6px;
+      max-height: 164px;
+      padding-right: 4px;
+      overflow: auto;
+    }
+
+    .symbol-button {
+      height: 36px;
+      min-width: 0;
+      border: 1px solid rgba(116, 139, 161, 0.22);
+      border-radius: var(--radius);
+      color: #172033;
+      background: rgba(255, 255, 255, 0.40);
+      cursor: pointer;
+      font-family: var(--formula-font), "Cambria Math", "Times New Roman", var(--sans);
+      font-size: 17px;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+    }
+
+    .symbol-button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(47, 111, 237, 0.42);
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 8px 16px rgba(31, 46, 72, 0.10);
+    }
+
+    .editor-panel .panel-body {
+      padding-bottom: 20px;
+    }
+
+    .ribbon {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .ribbon .toolbar {
+      margin-bottom: 0;
+    }
+
+    .rich-editor {
+      min-height: 640px;
+      max-height: calc(100vh - 196px);
+      padding: 28px 34px;
+      border: 1px solid rgba(116, 139, 161, 0.28);
+      border-radius: var(--radius);
+      outline: none;
+      color: #182235;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.84);
+      overflow: auto;
+      font-size: 16px;
+      line-height: 1.72;
+      transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .rich-editor:focus {
+      border-color: rgba(47, 111, 237, 0.48);
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 0 0 4px rgba(47, 111, 237, 0.10);
+    }
+
+    .rich-editor p {
+      margin: 0 0 14px;
+    }
+
+    .rich-editor p:last-child {
+      margin-bottom: 0;
+    }
+
+    .formula-node {
+      position: relative;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      background: rgba(239, 246, 255, 0.54);
+      cursor: pointer;
+      transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+      font-family: var(--formula-font), var(--sans);
+    }
+
+    .formula-node:hover {
+      border-color: rgba(47, 111, 237, 0.34);
+      background: rgba(232, 241, 255, 0.88);
+      box-shadow: 0 8px 16px rgba(47, 111, 237, 0.10);
+    }
+
+    .formula-node.is-selected {
+      border-color: rgba(15, 158, 181, 0.70);
+      background: rgba(224, 247, 250, 0.84);
+      box-shadow: 0 0 0 3px rgba(15, 158, 181, 0.10);
+    }
+
+    .formula-node.inline {
+      display: inline-flex;
+      min-height: 32px;
+      align-items: center;
+      margin: 0 3px;
+      padding: 2px 7px;
+      vertical-align: middle;
+    }
+
+    .formula-node.block {
+      display: flex;
+      min-height: 72px;
+      align-items: center;
+      justify-content: center;
+      margin: 18px 0;
+      padding: 12px 18px;
+    }
+
+    .formula-node mjx-container {
+      pointer-events: none;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      min-width: 230px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      margin-right: 8px;
+      border-radius: 999px;
+      background: var(--green);
+      box-shadow: 0 0 0 4px rgba(24, 135, 95, 0.12);
+    }
+
+    .dialog-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: grid;
+      place-items: center;
+      background: rgba(15, 23, 42, 0.22);
+      backdrop-filter: blur(12px);
+    }
+
+    .dialog-backdrop.hidden {
+      display: none;
+    }
+
+    .dialog {
+      width: 640px;
+      border: 1px solid rgba(226, 232, 240, 0.62);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 30px 80px rgba(15, 23, 42, 0.24);
+      overflow: hidden;
+    }
+
+    .dialog-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      border-bottom: 1px solid rgba(116, 139, 161, 0.18);
+    }
+
+    .dialog-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 750;
+    }
+
+    .dialog-body {
+      padding: 18px;
+    }
+
+    .dialog-input {
+      width: 100%;
+      min-height: 150px;
+      max-height: 150px;
+      padding: 14px;
+      border: 1px solid rgba(116, 139, 161, 0.30);
+      border-radius: var(--radius);
+      outline: none;
+      color: #12203a;
+      background: rgba(255, 255, 255, 0.88);
+      font-family: var(--mono);
+      line-height: 1.55;
+      resize: none;
+    }
+
+    .dialog-input:focus {
+      border-color: rgba(47, 111, 237, 0.54);
+      box-shadow: 0 0 0 4px rgba(47, 111, 237, 0.10);
+    }
+
+    .dialog-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .segmented {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid rgba(116, 139, 161, 0.24);
+      border-radius: var(--radius);
+      background: rgba(226, 232, 240, 0.48);
+    }
+
+    .segment {
+      min-width: 96px;
+      height: 36px;
+      border-radius: 6px;
+      color: #334155;
+      background: transparent;
+      cursor: pointer;
+      transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .segment.active {
+      color: #fff;
+      background: var(--blue);
+      box-shadow: 0 8px 18px rgba(47, 111, 237, 0.20);
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 0 18px 18px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 28px;
+      bottom: 26px;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 460px;
+      min-height: 44px;
+      padding: 0 16px;
+      border: 1px solid rgba(116, 139, 161, 0.24);
+      border-radius: var(--radius);
+      color: #1f2a44;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: opacity 180ms ease, transform 180ms ease;
+      backdrop-filter: blur(16px);
+      font-size: 14px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast i {
+      color: var(--green);
+    }
+
+    .toast.error i {
+      color: var(--danger);
+    }
+
+    .help-copy {
+      margin: 0;
+      color: #24314d;
+      line-height: 1.75;
+      white-space: pre-line;
+    }
+
+    .bottom-watermark {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 2;
+      height: 22px;
+      overflow: hidden;
+      pointer-events: none;
+      background: rgba(248, 251, 255, 0.36);
+      backdrop-filter: blur(10px);
+    }
+
+    .watermark-track {
+      position: absolute;
+      top: -22px;
+      left: 0;
+      width: 100%;
+      animation: watermarkDrop 3.2s linear infinite;
+    }
+
+    .watermark-row {
+      display: flex;
+      height: 22px;
+      align-items: center;
+      gap: 168px;
+      color: rgba(132, 82, 102, 0.20);
+      font-size: 8px;
+      white-space: nowrap;
+    }
+
+    @keyframes watermarkDrop {
+      from {
+        transform: translateY(0);
+      }
+      to {
+        transform: translateY(22px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><img src="assets/esdkaiyuan.png" alt=""></div>
+        <div>
+          <h1 id="appTitle">干翻传统公式编辑，全给我用LaTex</h1>
+          <p>Python 后端生成 Word 原生矢量公式，网页端实时编辑与复制 SVG</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="select-shell wide">
+          <select id="formulaFontSelect" title="Word 公式字体">
+            <option value="Cambria Math">Cambria Math</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Latin Modern Math">Latin Modern Math</option>
+            <option value="STIX Two Text">STIX Two Text</option>
+            <option value="Arial">Arial</option>
+          </select>
+        </div>
+        <button class="tool-button success" id="generateWordDocxButton" title="生成 Word 原生公式 DOCX">
+          <i class="fa-solid fa-file-word"></i>
+          生成 Word
+        </button>
+        <button class="tool-button" id="copyPreviewSvgHeader" title="Ctrl+Shift+V">
+          <i class="fa-solid fa-vector-square"></i>
+          复制矢量
+        </button>
+        <button class="tool-button primary" id="renderRightHeader" title="Ctrl+Enter">
+          <i class="fa-solid fa-bolt"></i>
+          渲染右侧
+        </button>
+        <button class="tool-button icon-only" id="openHelp" title="使用说明">
+          <i class="fa-regular fa-circle-question"></i>
+        </button>
+      </div>
+    </header>
+
+    <section class="workspace" aria-label="数学公式编辑器">
+      <aside class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><i class="fa-solid fa-code"></i>LaTeX 工作台</div>
+          <div class="panel-note">实时预览</div>
+        </div>
+        <div class="panel-body">
+          <div class="docx-options" aria-label="Word 输出设置">
+            <input id="docxTitleInput" type="text" value="Word 原生矢量公式" aria-label="Word 文档标题">
+            <input id="docxIntroInput" type="text" value="以下公式由 LaTeX 转换为 Word 原生公式对象。" aria-label="Word 文档说明">
+          </div>
+
+          <div class="toolbar" aria-label="LaTeX 操作">
+            <div class="select-shell">
+              <select id="sampleSelect" title="公式模板">
+                <option value="">公式模板</option>
+                <option value="E = mc^2">质能方程</option>
+                <option value="\frac{-b \pm \sqrt{b^2 - 4ac}}{2a}">二次方程</option>
+                <option value="\int_{0}^{\infty} e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}">高斯积分</option>
+                <option value="\sum_{k=1}^{n} k = \frac{n(n+1)}{2}">求和公式</option>
+                <option value="\begin{bmatrix} a & b \\ c & d \end{bmatrix}">矩阵</option>
+              </select>
+            </div>
+            <button class="tool-button primary" id="insertInlineFromLeft" title="插入为行内公式">
+              <i class="fa-solid fa-arrow-right-to-bracket"></i>
+              行内
+            </button>
+            <button class="tool-button" id="insertBlockFromLeft" title="插入为块级公式">
+              <i class="fa-solid fa-down-left-and-up-right-to-center"></i>
+              块级
+            </button>
+            <button class="tool-button icon-only" id="copyLeft" title="复制左侧 LaTeX">
+              <i class="fa-regular fa-copy"></i>
+            </button>
+            <button class="tool-button icon-only" id="copyPreviewSvg" title="复制预览 SVG 矢量">
+              <i class="fa-solid fa-vector-square"></i>
+            </button>
+            <button class="tool-button icon-only" id="downloadPreviewSvg" title="下载预览 SVG">
+              <i class="fa-solid fa-download"></i>
+            </button>
+          </div>
+
+          <textarea id="latexInput" class="latex-input" spellcheck="false" autocomplete="off">\frac{d}{dx}\left(\int_{0}^{x} f(t)\,dt\right)=f(x)</textarea>
+
+          <div class="section-label">
+            <span><i class="fa-solid fa-eye"></i> 预览</span>
+            <span id="previewState">MathJax SVG</span>
+          </div>
+          <div id="latexPreview" class="math-preview" aria-live="polite"></div>
+
+          <div class="symbol-panel" aria-label="符号库">
+            <div class="section-label">
+              <span><i class="fa-solid fa-shapes"></i> 符号库</span>
+              <span>点击插入 LaTeX</span>
+            </div>
+            <div id="symbolTabs" class="symbol-tabs"></div>
+            <div id="symbolPalette" class="symbol-grid"></div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="panel editor-panel">
+        <div class="panel-header">
+          <div class="panel-title"><i class="fa-solid fa-file-lines"></i>Word 风格编辑区</div>
+          <div class="panel-note">contenteditable 富文本</div>
+        </div>
+        <div class="panel-body">
+          <div class="ribbon">
+            <div class="toolbar" aria-label="富文本工具栏">
+              <div class="toolbar-group">
+                <button class="tool-button icon-only" data-command="bold" title="加粗">
+                  <i class="fa-solid fa-bold"></i>
+                </button>
+                <button class="tool-button icon-only" data-command="italic" title="斜体">
+                  <i class="fa-solid fa-italic"></i>
+                </button>
+                <button class="tool-button icon-only" data-command="underline" title="下划线">
+                  <i class="fa-solid fa-underline"></i>
+                </button>
+              </div>
+              <div class="toolbar-group">
+                <button class="tool-button icon-only" data-command="insertUnorderedList" title="项目符号">
+                  <i class="fa-solid fa-list-ul"></i>
+                </button>
+                <button class="tool-button icon-only" data-command="justifyLeft" title="左对齐">
+                  <i class="fa-solid fa-align-left"></i>
+                </button>
+                <button class="tool-button icon-only" data-command="justifyCenter" title="居中">
+                  <i class="fa-solid fa-align-center"></i>
+                </button>
+              </div>
+              <div class="toolbar-group">
+                <button class="tool-button primary" id="openInlineDialog" title="插入行内公式">
+                  <i class="fa-solid fa-plus"></i>
+                  行内公式
+                </button>
+                <button class="tool-button" id="openBlockDialog" title="插入块级公式">
+                  <i class="fa-solid fa-square-plus"></i>
+                  块级公式
+                </button>
+                <button class="tool-button icon-only" id="editFormula" title="编辑选中公式" disabled>
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button class="tool-button icon-only" id="copySelectedSvg" title="复制选中公式 SVG 矢量" disabled>
+                  <i class="fa-solid fa-vector-square"></i>
+                </button>
+                <button class="tool-button icon-only" id="downloadSelectedSvg" title="下载选中公式 SVG" disabled>
+                  <i class="fa-solid fa-download"></i>
+                </button>
+              </div>
+              <div class="toolbar-group">
+                <button class="tool-button success" id="renderManual">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  渲染
+                </button>
+                <button class="tool-button" id="extractLatex">
+                  <i class="fa-solid fa-file-export"></i>
+                  提取复制
+                </button>
+                <button class="tool-button icon-only ghost-danger" id="clearEditor" title="清空右侧">
+                  <i class="fa-regular fa-trash-can"></i>
+                </button>
+              </div>
+            </div>
+            <div class="status-bar"><span class="status-dot"></span><span id="docState">可编辑</span></div>
+          </div>
+
+          <div id="richEditor" class="rich-editor" contenteditable="true" spellcheck="false">
+            <p>牛顿第二定律可以写成 <span class="formula-node inline" data-latex="F = ma" data-display="false" contenteditable="false" tabindex="0"></span>，也可以在正文中继续输入普通文本。</p>
+            <p>手动输入 \(\alpha + \beta = \gamma\) 后，点击渲染即可转成可编辑公式节点。</p>
+            <div class="formula-node block" data-latex="\int_{a}^{b} f(x)\,dx = F(b) - F(a)" data-display="true" contenteditable="false" tabindex="0"></div>
+            <p><br></p>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div id="formulaDialog" class="dialog-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="formulaDialogTitle">
+    <div class="dialog">
+      <div class="dialog-header">
+        <div class="dialog-title" id="formulaDialogTitle"><i class="fa-solid fa-square-root-variable"></i><span>公式</span></div>
+        <button class="tool-button icon-only" id="closeDialog" title="关闭">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="dialog-body">
+        <textarea id="dialogLatex" class="dialog-input" spellcheck="false"></textarea>
+        <div class="dialog-row">
+          <div class="segmented" aria-label="公式类型">
+            <button class="segment active" id="segmentInline" data-display="false">行内</button>
+            <button class="segment" id="segmentBlock" data-display="true">块级</button>
+          </div>
+          <button class="tool-button" id="sendDialogToLeft">
+            <i class="fa-solid fa-arrow-left"></i>
+            同步左侧
+          </button>
+        </div>
+      </div>
+      <div class="dialog-actions">
+        <button class="tool-button" id="cancelDialog">取消</button>
+        <button class="tool-button primary" id="saveDialog">
+          <i class="fa-solid fa-check"></i>
+          应用
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="helpDialog" class="dialog-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="helpDialogTitle">
+    <div class="dialog">
+      <div class="dialog-header">
+        <div class="dialog-title" id="helpDialogTitle"><i class="fa-regular fa-circle-question"></i><span>使用说明</span></div>
+        <button class="tool-button icon-only" id="closeHelp" title="关闭">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="dialog-body">
+        <p id="helpCopy" class="help-copy">有任何宝贵的意见，以及问题需要反馈，请前往https://www.esdkaiyuan.online/
+
+基本使用说明：
+1. 左侧输入 LaTeX，MathJax 会实时渲染 SVG 矢量预览。
+2. 符号库按钮只显示数学符号，点击后把对应 LaTeX 示例插入光标处。
+3. 顶部字体下拉框会同步预览区域样式，并用于 Python 后端生成 Word 原生公式。
+4. 点击“生成 Word”会调用本地 Python 后端，下载包含 Word 原生矢量公式对象的 DOCX。
+5. Ctrl+Enter 渲染右侧公式，Ctrl+Shift+C 复制左侧 LaTeX，Ctrl+Shift+W 生成 Word。</p>
+      </div>
+      <div class="dialog-actions">
+        <button class="tool-button primary" id="confirmHelp">知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite">
+    <i class="fa-solid fa-circle-check"></i>
+    <span id="toastText"></span>
+  </div>
+
+  <div class="bottom-watermark" aria-hidden="true">
+    <div class="watermark-track" id="watermarkTrack">
+      <div class="watermark-row"></div>
+      <div class="watermark-row"></div>
+    </div>
+  </div>
+
+  <script id="editor-core" type="text/plain">
+(function (global) {
+  const delimiterPattern = /\\\(([\s\S]*?)\\\)|\\\[([\s\S]*?)\\\]/g;
+
+  function tokenizeLatexDelimiters(text) {
+    const value = String(text || '');
+    const tokens = [];
+    let lastIndex = 0;
+    let match;
+
+    delimiterPattern.lastIndex = 0;
+    while ((match = delimiterPattern.exec(value)) !== null) {
+      if (match.index > lastIndex) {
+        tokens.push({ type: 'text', value: value.slice(lastIndex, match.index) });
+      }
+
+      const isDisplay = typeof match[2] === 'string';
+      tokens.push({
+        type: 'formula',
+        latex: isDisplay ? match[2] : match[1],
+        display: isDisplay,
+        raw: match[0]
+      });
+      lastIndex = delimiterPattern.lastIndex;
+    }
+
+    if (lastIndex < value.length) {
+      tokens.push({ type: 'text', value: value.slice(lastIndex) });
+    }
+
+    return tokens.length ? tokens : [{ type: 'text', value }];
+  }
+
+  function wrapLatex(latex, display) {
+    return display ? `\\[${latex}\\]` : `\\(${latex}\\)`;
+  }
+
+  function decodeHtmlEntities(value) {
+    return String(value || '')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&');
+  }
+
+  function readAttribute(attrs, name) {
+    const pattern = new RegExp(`${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`, 'i');
+    const match = String(attrs || '').match(pattern);
+    return match ? decodeHtmlEntities(match[1] || match[2] || match[3] || '') : '';
+  }
+
+  function extractLatexFromHtml(html) {
+    const output = [];
+    const nodePattern = /<\w+\b(?=[^>]*\bformula-node\b)([^>]*)>/gi;
+    let match;
+
+    while ((match = nodePattern.exec(String(html || ''))) !== null) {
+      const attrs = match[1];
+      const latex = readAttribute(attrs, 'data-latex');
+      const display = readAttribute(attrs, 'data-display') === 'true';
+
+      if (latex.trim()) {
+        output.push(wrapLatex(latex, display));
+      }
+    }
+
+    return output.join('\n');
+  }
+
+  function prepareSvgForClipboard(svgMarkup) {
+    const source = String(svgMarkup || '').trim();
+    if (!source) return '';
+
+    let svg = source
+      .replace(/\srole=(?:"[^"]*"|'[^']*')/g, '')
+      .replace(/\sfocusable=(?:"[^"]*"|'[^']*')/g, '')
+      .replace(/\saria-hidden=(?:"[^"]*"|'[^']*')/g, '');
+
+    if (!/\sxmlns=/.test(svg)) {
+      svg = svg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+    }
+
+    if (!/<title[\s>]/i.test(svg)) {
+      svg = svg.replace(/(<svg\b[^>]*>)/i, '$1<title>Formula Studio Equation</title>');
+    }
+
+    return svg;
+  }
+
+  function svgToDataUrl(svgMarkup) {
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(String(svgMarkup || ''))}`;
+  }
+
+  global.EditorCore = {
+    tokenizeLatexDelimiters,
+    wrapLatex,
+    extractLatexFromHtml,
+    prepareSvgForClipboard,
+    svgToDataUrl
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+  </script>
+
+  <script id="app-script">
+    (() => {
+      const coreSource = document.getElementById('editor-core').textContent;
+      new Function(coreSource)();
+
+      const Core = window.EditorCore;
+      const $ = (selector, root = document) => root.querySelector(selector);
+      const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+      const fallbackConfig = {
+        appTitle: '干翻传统公式编辑，全给我用LaTex',
+        feedbackUrl: 'https://www.esdkaiyuan.online/',
+        helpText: '有任何宝贵的意见，以及问题需要反馈，请前往https://www.esdkaiyuan.online/\\n\\n基本使用说明：\\n1. 左侧输入 LaTeX，MathJax 会实时渲染 SVG 矢量预览。\\n2. 点击符号库里的数学符号，可把对应 LaTeX 示例插入到光标位置。\\n3. 顶部字体下拉框会同步预览区域样式，并用于 Python 后端生成 Word 原生公式。\\n4. 点击“生成 Word”会下载包含 Word 原生矢量公式对象的 DOCX。\\n5. Ctrl+Enter 渲染右侧公式，Ctrl+Shift+C 复制左侧 LaTeX，Ctrl+Shift+W 生成 Word。',
+        watermarkText: 'esdkaiyuan.online',
+        formulaFonts: ['Cambria Math', 'Times New Roman', 'Latin Modern Math', 'STIX Two Text', 'Arial'],
+        symbolGroups: [
+          {
+            name: '基础',
+            symbols: [
+              { label: 'a⁄b', snippet: '\\\\frac{a}{b}', hint: '分式：分子 a，分母 b' },
+              { label: 'x²', snippet: 'x^{2}', hint: '上标' },
+              { label: '√x', snippet: '\\\\sqrt{x}', hint: '平方根' },
+              { label: '∫ₐᵇ', snippet: '\\\\int_{a}^{b} f(x)\\\\,dx', hint: '定积分' }
+            ]
+          },
+          {
+            name: '希腊',
+            symbols: [
+              { label: 'α', snippet: '\\\\alpha ', hint: 'alpha' },
+              { label: 'β', snippet: '\\\\beta ', hint: 'beta' },
+              { label: 'π', snippet: '\\\\pi ', hint: 'pi' },
+              { label: 'Ω', snippet: '\\\\Omega ', hint: 'Omega' }
+            ]
+          }
+        ]
+      };
+
+      const latexInput = $('#latexInput');
+      const latexPreview = $('#latexPreview');
+      const previewState = $('#previewState');
+      const editor = $('#richEditor');
+      const docState = $('#docState');
+      const formulaFontSelect = $('#formulaFontSelect');
+      const symbolTabs = $('#symbolTabs');
+      const symbolPalette = $('#symbolPalette');
+      const docxTitleInput = $('#docxTitleInput');
+      const docxIntroInput = $('#docxIntroInput');
+      const helpDialog = $('#helpDialog');
+      const helpCopy = $('#helpCopy');
+      const appTitle = $('#appTitle');
+      const watermarkTrack = $('#watermarkTrack');
+      const toast = $('#toast');
+      const toastText = $('#toastText');
+      const dialog = $('#formulaDialog');
+      const dialogLatex = $('#dialogLatex');
+      const dialogTitle = $('#formulaDialogTitle span');
+      const editFormulaButton = $('#editFormula');
+      const copySelectedSvgButton = $('#copySelectedSvg');
+      const downloadSelectedSvgButton = $('#downloadSelectedSvg');
+      const segmentInline = $('#segmentInline');
+      const segmentBlock = $('#segmentBlock');
+
+      let savedRange = null;
+      let selectedFormula = null;
+      let dialogFormula = null;
+      let dialogDisplay = false;
+      let previewTimer = null;
+      let toastTimer = null;
+      let backendAvailable = false;
+      let currentFormulaFont = 'Cambria Math';
+
+      function showToast(message, isError = false) {
+        window.clearTimeout(toastTimer);
+        toast.classList.toggle('error', isError);
+        toast.querySelector('i').className = isError ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-circle-check';
+        toastText.textContent = message;
+        toast.classList.add('show');
+        toastTimer = window.setTimeout(() => toast.classList.remove('show'), 2200);
+      }
+
+      function setDocumentState(text) {
+        docState.textContent = text;
+      }
+
+      function cssFontValue(fontName) {
+        return `"${String(fontName || 'Cambria Math').replace(/"/g, '')}"`;
+      }
+
+      function applyFormulaFont(fontName) {
+        currentFormulaFont = fontName || 'Cambria Math';
+        document.documentElement.style.setProperty('--formula-font', cssFontValue(currentFormulaFont));
+        previewState.textContent = `MathJax SVG · ${currentFormulaFont}`;
+        updateLeftPreview();
+        renderAllFormulaNodes(editor);
+      }
+
+      function renderFormulaFonts(fonts) {
+        formulaFontSelect.innerHTML = '';
+        fonts.forEach((font) => {
+          const option = document.createElement('option');
+          option.value = font;
+          option.textContent = font;
+          formulaFontSelect.appendChild(option);
+        });
+        formulaFontSelect.value = fonts.includes('Cambria Math') ? 'Cambria Math' : fonts[0];
+        applyFormulaFont(formulaFontSelect.value);
+      }
+
+      function preferredCursorOffset(snippet) {
+        const value = String(snippet || '');
+        const emptyGroup = value.indexOf('{}');
+        if (emptyGroup >= 0) return emptyGroup + 1;
+        for (const marker of ['{a}', '{x}', '{f}', '{i=1}', '{D}', '{\\Omega}']) {
+          const index = value.indexOf(marker);
+          if (index >= 0) return index + 1;
+        }
+        return value.length;
+      }
+
+      function insertLatexSnippet(snippet) {
+        const target = helpDialog.classList.contains('hidden') && !dialog.classList.contains('hidden')
+          ? dialogLatex
+          : latexInput;
+        const start = target.selectionStart ?? target.value.length;
+        const end = target.selectionEnd ?? target.value.length;
+        const before = target.value.slice(0, start);
+        const after = target.value.slice(end);
+        target.value = `${before}${snippet}${after}`;
+        const caret = start + preferredCursorOffset(snippet);
+        target.focus();
+        target.setSelectionRange(caret, caret);
+        if (target === latexInput) updateLeftPreview();
+      }
+
+      function renderSymbolPalette(groups) {
+        const symbolGroups = groups && groups.length ? groups : fallbackConfig.symbolGroups;
+        let activeIndex = 0;
+
+        function renderActiveGroup() {
+          symbolPalette.innerHTML = '';
+          const activeGroup = symbolGroups[activeIndex];
+          $$('.symbol-tab', symbolTabs).forEach((tab, index) => tab.classList.toggle('active', index === activeIndex));
+          activeGroup.symbols.forEach((symbol) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'symbol-button';
+            button.textContent = symbol.label;
+            button.title = `${symbol.hint || symbol.snippet}\n${symbol.snippet}`;
+            button.addEventListener('click', () => insertLatexSnippet(symbol.snippet));
+            symbolPalette.appendChild(button);
+          });
+        }
+
+        symbolTabs.innerHTML = '';
+        symbolGroups.forEach((group, index) => {
+          const tab = document.createElement('button');
+          tab.type = 'button';
+          tab.className = 'symbol-tab';
+          tab.textContent = group.name;
+          tab.addEventListener('click', () => {
+            activeIndex = index;
+            renderActiveGroup();
+          });
+          symbolTabs.appendChild(tab);
+        });
+        renderActiveGroup();
+      }
+
+      function renderWatermark(text) {
+        const rows = $$('.watermark-row', watermarkTrack);
+        rows.forEach((row) => {
+          row.innerHTML = '';
+          for (let index = 0; index < 12; index += 1) {
+            const span = document.createElement('span');
+            span.textContent = text;
+            row.appendChild(span);
+          }
+        });
+      }
+
+      function applyBackendConfig(config) {
+        document.title = config.appTitle || fallbackConfig.appTitle;
+        appTitle.textContent = config.appTitle || fallbackConfig.appTitle;
+        helpCopy.textContent = config.helpText || fallbackConfig.helpText;
+        renderWatermark(config.watermarkText || fallbackConfig.watermarkText);
+        renderFormulaFonts(config.formulaFonts || fallbackConfig.formulaFonts);
+        renderSymbolPalette(config.symbolGroups || fallbackConfig.symbolGroups);
+      }
+
+      async function loadBackendConfig() {
+        try {
+          const response = await fetch('/api/config', { cache: 'no-store' });
+          if (!response.ok) throw new Error('config unavailable');
+          const config = await response.json();
+          backendAvailable = true;
+          applyBackendConfig(config);
+          setDocumentState('Python 后端已连接');
+        } catch (error) {
+          backendAvailable = false;
+          applyBackendConfig(fallbackConfig);
+          setDocumentState('本地预览模式');
+        }
+      }
+
+      function mathJaxReady() {
+        if (window.MathJax && MathJax.startup && MathJax.startup.promise) {
+          return MathJax.startup.promise;
+        }
+        return new Promise((resolve) => {
+          const wait = () => {
+            if (window.MathJax && MathJax.startup && MathJax.startup.promise) {
+              MathJax.startup.promise.then(resolve);
+            } else {
+              window.setTimeout(wait, 70);
+            }
+          };
+          wait();
+        });
+      }
+
+      async function typeset(elements) {
+        const targets = Array.isArray(elements) ? elements : [elements];
+        try {
+          await mathJaxReady();
+          await MathJax.typesetPromise(targets);
+          previewState.textContent = `MathJax SVG · ${currentFormulaFont}`;
+        } catch (error) {
+          previewState.textContent = '渲染异常';
+          showToast(error.message || '公式渲染失败', true);
+        }
+      }
+
+      function clearMath(elements) {
+        if (window.MathJax && MathJax.typesetClear) {
+          try {
+            MathJax.typesetClear(Array.isArray(elements) ? elements : [elements]);
+          } catch (error) {
+            // MathJax keeps its own item registry; failed cleanup is harmless here.
+          }
+        }
+      }
+
+      function hasDelimiters(value) {
+        return /\\\(|\\\[/.test(value);
+      }
+
+      function updateLeftPreview() {
+        window.clearTimeout(previewTimer);
+        previewTimer = window.setTimeout(() => {
+          const latex = latexInput.value.trim();
+          clearMath(latexPreview);
+          latexPreview.textContent = latex ? (hasDelimiters(latex) ? latex : Core.wrapLatex(latex, true)) : '';
+          if (latex) {
+            typeset(latexPreview);
+          }
+        }, 90);
+      }
+
+      function createFormulaNode(latex, display) {
+        const node = document.createElement(display ? 'div' : 'span');
+        node.className = `formula-node ${display ? 'block' : 'inline'}`;
+        node.dataset.latex = String(latex || '').trim() || 'x';
+        node.dataset.display = String(Boolean(display));
+        node.contentEditable = 'false';
+        node.tabIndex = 0;
+        node.title = '双击编辑公式';
+        return node;
+      }
+
+      function renderFormulaNode(node) {
+        const latex = node.dataset.latex || '';
+        const display = node.dataset.display === 'true';
+        node.classList.toggle('inline', !display);
+        node.classList.toggle('block', display);
+        clearMath(node);
+        node.textContent = Core.wrapLatex(latex, display);
+        typeset(node);
+      }
+
+      function renderAllFormulaNodes(root = editor) {
+        $$('.formula-node', root).forEach(renderFormulaNode);
+      }
+
+      function saveSelection() {
+        const selection = window.getSelection();
+        if (!selection || !selection.rangeCount) return;
+        const anchor = selection.anchorNode;
+        if (anchor && editor.contains(anchor)) {
+          savedRange = selection.getRangeAt(0).cloneRange();
+        }
+      }
+
+      function restoreSelection() {
+        editor.focus();
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        if (savedRange && editor.contains(savedRange.commonAncestorContainer)) {
+          selection.addRange(savedRange);
+          return;
+        }
+
+        const range = document.createRange();
+        range.selectNodeContents(editor);
+        range.collapse(false);
+        selection.addRange(range);
+      }
+
+      function placeCaretAfter(node) {
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.setStartAfter(node);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        savedRange = range.cloneRange();
+      }
+
+      function insertFormula(latex, display) {
+        restoreSelection();
+        const selection = window.getSelection();
+        const range = selection.rangeCount ? selection.getRangeAt(0) : null;
+        const node = createFormulaNode(latex, display);
+
+        if (range) {
+          range.deleteContents();
+          range.insertNode(node);
+        } else {
+          editor.appendChild(node);
+        }
+
+        if (display) {
+          const nextParagraph = document.createElement('p');
+          nextParagraph.innerHTML = '<br>';
+          node.after(nextParagraph);
+          placeCaretAfter(nextParagraph);
+        } else {
+          const spacer = document.createTextNode('\u00a0');
+          node.after(spacer);
+          placeCaretAfter(spacer);
+        }
+
+        renderFormulaNode(node);
+        selectFormula(node);
+        setDocumentState('已插入公式');
+      }
+
+      function selectFormula(node) {
+        if (selectedFormula) {
+          selectedFormula.classList.remove('is-selected');
+        }
+        selectedFormula = node || null;
+        if (selectedFormula) {
+          selectedFormula.classList.add('is-selected');
+        }
+        editFormulaButton.disabled = !selectedFormula;
+        copySelectedSvgButton.disabled = !selectedFormula;
+        downloadSelectedSvgButton.disabled = !selectedFormula;
+      }
+
+      function runEditorCommand(command) {
+        restoreSelection();
+        document.execCommand(command, false, null);
+        saveSelection();
+        editor.focus();
+        setDocumentState('正在编辑');
+      }
+
+      function setDialogDisplay(display) {
+        dialogDisplay = Boolean(display);
+        segmentInline.classList.toggle('active', !dialogDisplay);
+        segmentBlock.classList.toggle('active', dialogDisplay);
+      }
+
+      function openFormulaDialog({ latex = '', display = false, formula = null } = {}) {
+        dialogFormula = formula;
+        dialogTitle.textContent = formula ? '编辑公式' : '插入公式';
+        dialogLatex.value = latex || latexInput.value.trim() || 'x^2 + y^2 = z^2';
+        setDialogDisplay(display);
+        dialog.classList.remove('hidden');
+        window.setTimeout(() => {
+          dialogLatex.focus();
+          dialogLatex.select();
+        }, 30);
+      }
+
+      function closeFormulaDialog() {
+        dialog.classList.add('hidden');
+        dialogFormula = null;
+        editor.focus();
+      }
+
+      function applyDialogFormula() {
+        const latex = dialogLatex.value.trim();
+        if (!latex) {
+          showToast('LaTeX 不能为空', true);
+          return;
+        }
+
+        if (dialogFormula) {
+          dialogFormula.dataset.latex = latex;
+          dialogFormula.dataset.display = String(dialogDisplay);
+          renderFormulaNode(dialogFormula);
+          selectFormula(dialogFormula);
+          setDocumentState('公式已更新');
+        } else {
+          insertFormula(latex, dialogDisplay);
+        }
+
+        closeFormulaDialog();
+      }
+
+      function renderManualDelimiters() {
+        const walker = document.createTreeWalker(
+          editor,
+          NodeFilter.SHOW_TEXT,
+          {
+            acceptNode(node) {
+              if (!node.nodeValue || !hasDelimiters(node.nodeValue)) return NodeFilter.FILTER_REJECT;
+              if (node.parentElement && node.parentElement.closest('.formula-node')) return NodeFilter.FILTER_REJECT;
+              return NodeFilter.FILTER_ACCEPT;
+            }
+          }
+        );
+
+        const textNodes = [];
+        while (walker.nextNode()) {
+          textNodes.push(walker.currentNode);
+        }
+
+        let formulaCount = 0;
+        textNodes.forEach((textNode) => {
+          const tokens = Core.tokenizeLatexDelimiters(textNode.nodeValue);
+          if (!tokens.some((token) => token.type === 'formula')) return;
+
+          const fragment = document.createDocumentFragment();
+          tokens.forEach((token) => {
+            if (token.type === 'text') {
+              fragment.appendChild(document.createTextNode(token.value));
+            } else {
+              formulaCount += 1;
+              fragment.appendChild(createFormulaNode(token.latex, token.display));
+            }
+          });
+          textNode.replaceWith(fragment);
+        });
+
+        renderAllFormulaNodes(editor);
+        setDocumentState(formulaCount ? `已渲染 ${formulaCount} 个公式` : '无待渲染公式');
+        showToast(formulaCount ? `已渲染 ${formulaCount} 个公式` : '没有发现新的 LaTeX 定界符');
+        return formulaCount;
+      }
+
+      function fallbackCopy(text) {
+        const temp = document.createElement('textarea');
+        temp.value = text;
+        temp.setAttribute('readonly', '');
+        temp.style.position = 'fixed';
+        temp.style.left = '-9999px';
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        temp.remove();
+      }
+
+      async function copyText(text, successMessage) {
+        if (!text.trim()) {
+          showToast('没有可复制的内容', true);
+          return;
+        }
+
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+          } else {
+            fallbackCopy(text);
+          }
+          showToast(successMessage);
+        } catch (error) {
+          fallbackCopy(text);
+          showToast(successMessage);
+        }
+      }
+
+      function getRenderedSvgMarkup(sourceElement) {
+        const svg = sourceElement ? sourceElement.querySelector('mjx-container svg') : null;
+        return svg ? Core.prepareSvgForClipboard(svg.outerHTML) : '';
+      }
+
+      async function copySvgMarkup(svgMarkup, successMessage) {
+        const svg = Core.prepareSvgForClipboard(svgMarkup);
+        if (!svg) {
+          showToast('请先完成公式渲染', true);
+          return false;
+        }
+
+        try {
+          if (navigator.clipboard && window.ClipboardItem && window.isSecureContext) {
+            const item = new ClipboardItem({
+              'image/svg+xml': new Blob([svg], { type: 'image/svg+xml' }),
+              'text/html': new Blob([svg], { type: 'text/html' }),
+              'text/plain': new Blob([svg], { type: 'text/plain' })
+            });
+            await navigator.clipboard.write([item]);
+            showToast(successMessage);
+            return true;
+          }
+        } catch (error) {
+          // Some browsers expose ClipboardItem but reject SVG MIME writes.
+        }
+
+        await copyText(svg, `${successMessage}（已复制 SVG 源码）`);
+        return true;
+      }
+
+      function downloadSvgMarkup(svgMarkup, filename) {
+        const svg = Core.prepareSvgForClipboard(svgMarkup);
+        if (!svg) {
+          showToast('请先完成公式渲染', true);
+          return;
+        }
+
+        const link = document.createElement('a');
+        link.href = Core.svgToDataUrl(svg);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        showToast('已下载 SVG 矢量文件');
+      }
+
+      async function copyPreviewSvg() {
+        await typeset(latexPreview);
+        copySvgMarkup(getRenderedSvgMarkup(latexPreview), '已复制预览 SVG 矢量');
+      }
+
+      function downloadPreviewSvg() {
+        downloadSvgMarkup(getRenderedSvgMarkup(latexPreview), 'formula-preview.svg');
+      }
+
+      async function copySelectedFormulaSvg() {
+        if (!selectedFormula) {
+          showToast('请先选中右侧公式', true);
+          return;
+        }
+        await typeset(selectedFormula);
+        copySvgMarkup(getRenderedSvgMarkup(selectedFormula), '已复制选中公式 SVG 矢量');
+      }
+
+      function downloadSelectedFormulaSvg() {
+        if (!selectedFormula) {
+          showToast('请先选中右侧公式', true);
+          return;
+        }
+        downloadSvgMarkup(getRenderedSvgMarkup(selectedFormula), 'formula-selected.svg');
+      }
+
+      function copyLeftLatex() {
+        copyText(latexInput.value.trim(), '已复制左侧 LaTeX');
+      }
+
+      function extractAndCopyLatex() {
+        renderManualDelimiters();
+        const source = Core.extractLatexFromHtml(editor.innerHTML);
+        copyText(source, '已复制右侧全部公式源码');
+      }
+
+      function clearEditor() {
+        if (!window.confirm('清空右侧编辑区？')) return;
+        clearMath(editor);
+        editor.innerHTML = '<p><br></p>';
+        savedRange = null;
+        selectFormula(null);
+        setDocumentState('空白文档');
+        editor.focus();
+      }
+
+      function insertLeftLatex(display) {
+        const latex = latexInput.value.trim();
+        if (!latex) {
+          showToast('左侧 LaTeX 为空', true);
+          return;
+        }
+        insertFormula(latex, display);
+      }
+
+      function leftEquations() {
+        return latexInput.value
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter(Boolean);
+      }
+
+      function editorEquations() {
+        return $$('.formula-node', editor)
+          .map((node) => (node.dataset.latex || '').trim())
+          .filter(Boolean);
+      }
+
+      function collectDocxEquations() {
+        const left = leftEquations();
+        if (left.length) return left;
+        renderManualDelimiters();
+        return editorEquations();
+      }
+
+      async function generateWordDocx() {
+        if (!backendAvailable) {
+          showToast('请通过 Python 后端启动网页版后再生成 Word', true);
+          return;
+        }
+
+        const equations = collectDocxEquations();
+        setDocumentState('正在生成 Word');
+        try {
+          const response = await fetch('/api/docx', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: docxTitleInput.value,
+              intro: docxIntroInput.value,
+              equations,
+              formulaFont: formulaFontSelect.value
+            })
+          });
+
+          if (!response.ok) {
+            let message = 'Word 生成失败';
+            try {
+              const payload = await response.json();
+              message = payload.error || message;
+            } catch (error) {
+              message = await response.text() || message;
+            }
+            throw new Error(message);
+          }
+
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'generated-formulas.docx';
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(url);
+          setDocumentState('Word 已下载');
+          showToast('已生成 Word 原生矢量公式文档');
+        } catch (error) {
+          setDocumentState('Word 生成失败');
+          showToast(error.message || 'Word 生成失败', true);
+        }
+      }
+
+      function openHelpDialog() {
+        helpDialog.classList.remove('hidden');
+      }
+
+      function closeHelpDialog() {
+        helpDialog.classList.add('hidden');
+      }
+
+      function wireEvents() {
+        latexInput.addEventListener('input', updateLeftPreview);
+        formulaFontSelect.addEventListener('change', () => applyFormulaFont(formulaFontSelect.value));
+
+        $('#sampleSelect').addEventListener('change', (event) => {
+          if (!event.target.value) return;
+          latexInput.value = event.target.value;
+          updateLeftPreview();
+          latexInput.focus();
+        });
+
+        $('#insertInlineFromLeft').addEventListener('click', () => insertLeftLatex(false));
+        $('#insertBlockFromLeft').addEventListener('click', () => insertLeftLatex(true));
+        $('#copyLeft').addEventListener('click', copyLeftLatex);
+        $('#copyPreviewSvg').addEventListener('click', copyPreviewSvg);
+        $('#downloadPreviewSvg').addEventListener('click', downloadPreviewSvg);
+        $('#copyPreviewSvgHeader').addEventListener('click', copyPreviewSvg);
+        $('#generateWordDocxButton').addEventListener('click', generateWordDocx);
+        $('#openHelp').addEventListener('click', openHelpDialog);
+        $('#closeHelp').addEventListener('click', closeHelpDialog);
+        $('#confirmHelp').addEventListener('click', closeHelpDialog);
+        $('#renderRightHeader').addEventListener('click', renderManualDelimiters);
+        $('#renderManual').addEventListener('click', renderManualDelimiters);
+        $('#extractLatex').addEventListener('click', extractAndCopyLatex);
+        $('#clearEditor').addEventListener('click', clearEditor);
+
+        $('#openInlineDialog').addEventListener('click', () => openFormulaDialog({ display: false }));
+        $('#openBlockDialog').addEventListener('click', () => openFormulaDialog({ display: true }));
+        editFormulaButton.addEventListener('click', () => {
+          if (!selectedFormula) return;
+          openFormulaDialog({
+            latex: selectedFormula.dataset.latex,
+            display: selectedFormula.dataset.display === 'true',
+            formula: selectedFormula
+          });
+        });
+        copySelectedSvgButton.addEventListener('click', copySelectedFormulaSvg);
+        downloadSelectedSvgButton.addEventListener('click', downloadSelectedFormulaSvg);
+
+        $$('[data-command]').forEach((button) => {
+          button.addEventListener('click', () => runEditorCommand(button.dataset.command));
+        });
+
+        editor.addEventListener('keyup', saveSelection);
+        editor.addEventListener('mouseup', saveSelection);
+        editor.addEventListener('focus', saveSelection);
+        editor.addEventListener('input', () => setDocumentState('正在编辑'));
+
+        editor.addEventListener('paste', (event) => {
+          event.preventDefault();
+          const text = event.clipboardData.getData('text/plain');
+          document.execCommand('insertText', false, text);
+          saveSelection();
+        });
+
+        editor.addEventListener('click', (event) => {
+          const formula = event.target.closest('.formula-node');
+          selectFormula(formula);
+          if (!formula) saveSelection();
+        });
+
+        editor.addEventListener('dblclick', (event) => {
+          const formula = event.target.closest('.formula-node');
+          if (!formula) return;
+          event.preventDefault();
+          selectFormula(formula);
+          openFormulaDialog({
+            latex: formula.dataset.latex,
+            display: formula.dataset.display === 'true',
+            formula
+          });
+        });
+
+        editor.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' && selectedFormula && document.activeElement === selectedFormula) {
+            event.preventDefault();
+            openFormulaDialog({
+              latex: selectedFormula.dataset.latex,
+              display: selectedFormula.dataset.display === 'true',
+              formula: selectedFormula
+            });
+          }
+        });
+
+        segmentInline.addEventListener('click', () => setDialogDisplay(false));
+        segmentBlock.addEventListener('click', () => setDialogDisplay(true));
+        $('#closeDialog').addEventListener('click', closeFormulaDialog);
+        $('#cancelDialog').addEventListener('click', closeFormulaDialog);
+        $('#saveDialog').addEventListener('click', applyDialogFormula);
+        $('#sendDialogToLeft').addEventListener('click', () => {
+          latexInput.value = dialogLatex.value;
+          updateLeftPreview();
+          showToast('已同步到左侧 LaTeX');
+        });
+
+        dialog.addEventListener('click', (event) => {
+          if (event.target === dialog) closeFormulaDialog();
+        });
+
+        helpDialog.addEventListener('click', (event) => {
+          if (event.target === helpDialog) closeHelpDialog();
+        });
+
+        dialogLatex.addEventListener('keydown', (event) => {
+          if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+            event.preventDefault();
+            applyDialogFormula();
+          }
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            closeFormulaDialog();
+          }
+        });
+
+        document.addEventListener('keydown', (event) => {
+          const primary = event.ctrlKey || event.metaKey;
+          const key = event.key.toLowerCase();
+
+          if (primary && event.key === 'Enter') {
+            event.preventDefault();
+            if (!dialog.classList.contains('hidden')) {
+              applyDialogFormula();
+            } else {
+              renderManualDelimiters();
+            }
+          }
+
+          if (event.ctrlKey && event.shiftKey && key === 'c') {
+            event.preventDefault();
+            copyLeftLatex();
+          }
+
+          if (event.ctrlKey && event.shiftKey && key === 'v') {
+            event.preventDefault();
+            if (selectedFormula && editor.contains(document.activeElement)) {
+              copySelectedFormulaSvg();
+            } else {
+              copyPreviewSvg();
+            }
+          }
+
+          if (primary && event.shiftKey && key === 'e') {
+            event.preventDefault();
+            extractAndCopyLatex();
+          }
+
+          if (primary && event.shiftKey && key === 'w') {
+            event.preventDefault();
+            generateWordDocx();
+          }
+        });
+      }
+
+      async function init() {
+        wireEvents();
+        await loadBackendConfig();
+        renderAllFormulaNodes(editor);
+        updateLeftPreview();
+        saveSelection();
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>

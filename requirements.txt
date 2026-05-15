@@ -4,3 +4,4 @@ latex2mathml
 matplotlib
 pillow
 pyinstaller
+flask

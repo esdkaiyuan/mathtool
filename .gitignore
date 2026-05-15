@@ -16,6 +16,3 @@ word-formula-preview-*/
 
 .DS_Store
 Thumbs.db
-
-# Legacy single-file web prototype, not part of the Python desktop app.
-index.html

@@ -13,7 +13,7 @@ python3 -m venv .venv-mac
 source .venv-mac/bin/activate
 
 python -m pip install --upgrade pip
-python -m pip install python-docx lxml latex2mathml matplotlib pillow pyinstaller
+python -m pip install python-docx lxml latex2mathml matplotlib pillow flask pyinstaller
 
 OFFICE_XSL="${MML2OMML_XSL:-/Applications/Microsoft Word.app/Contents/Resources/MML2OMML.XSL}"
 if [[ ! -f "$OFFICE_XSL" ]]; then
@@ -27,12 +27,13 @@ pyinstaller \
   --windowed \
   --name WordFormulaStudio \
   --icon "assets/esdkaiyuan.icns" \
-  --collect-data matplotlib \
-  --collect-submodules matplotlib.backends.backend_agg \
+  --hidden-import flask \
+  --hidden-import werkzeug.serving \
+  --add-data "index.html:." \
   --add-data "assets/esdkaiyuan.png:assets" \
   --add-data "assets/esdkaiyuan.icns:assets" \
   --add-data "$OFFICE_XSL:." \
-  word_formula_studio.py
+  web_formula_studio.py
 
 echo "Built dist/WordFormulaStudio.app"
 
