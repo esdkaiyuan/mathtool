@@ -47,6 +47,21 @@ class WebFrontendTests(unittest.TestCase):
             with self.subTest(color=color):
                 self.assertIn(color, self.html)
 
+    def test_web_app_uses_readable_pc_sizing(self):
+        expected_css = [
+            "grid-template-columns: minmax(540px, 6fr) minmax(580px, 7fr)",
+            "font-size: 16px",
+            "font-size: 13px",
+            "font-size: 12px",
+            "font-size: 15px",
+            "min-height: 230px",
+            "grid-template-columns: repeat(5, minmax(0, 1fr))",
+        ]
+
+        for css in expected_css:
+            with self.subTest(css=css):
+                self.assertIn(css, self.html)
+
 
 if __name__ == "__main__":
     unittest.main()
