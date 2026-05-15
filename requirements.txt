@@ -1,0 +1,6 @@
+python-docx
+lxml
+latex2mathml
+matplotlib
+pillow
+pyinstaller

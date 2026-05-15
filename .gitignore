@@ -1,0 +1,21 @@
+__pycache__/
+*.py[cod]
+
+.venv/
+.venv-*/
+venv/
+
+build/
+dist/
+*.spec
+
+*.docx
+preview-test-output/
+preview-font-pass-through/
+word-formula-preview-*/
+
+.DS_Store
+Thumbs.db
+
+# Legacy single-file web prototype, not part of the Python desktop app.
+index.html
